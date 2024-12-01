@@ -1,14 +1,23 @@
 # Advent of Code 2024
 
-## How to use the script to pull the inputs
+## Disclaimer
+
+The attached tests are the solution to my inputs.
+You will need to use your own inputs.
+However, the spirit of the event is to explore the project and find your own solution.
+I strongly recommend attempting each problem on your own and using this as inspiration only if you get stuck.
+Anyone can copy and paste solutions,
+but the true value lies in the journey of solving them.
+
+## How to use the script to pull inputs
 
 ### Requirements:
 - Python3
-  - python-dotenv dependency installed
+  - `python-dotenv` dependency installed
 
 ### Environment file
 
-It is required to have a .env file with the following inside to pull the day specific data:
+Create a `.env` file with the following content to pull day-specific data:
 
 ```env
 SESSION=<session token>
@@ -22,7 +31,7 @@ python3 ./pull_days.py
 
 ## Requirements
 
-- cargo
+- `cargo`
 
 ## How to run the specific days
 
