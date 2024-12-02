@@ -29,7 +29,7 @@ impl Report {
         if self.is_safe_zero_tolerance() {
             return true;
         }
-        for i in (0..=self.numbers.len()).rev() {
+        for i in (0..self.numbers.len()).rev() {
             let mut numbers = self
                 .numbers
                 .iter()
