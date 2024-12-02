@@ -55,6 +55,17 @@ where
     }
 }
 
+pub trait IteratorWithout: Iterator
+where
+    Self: Sized + Clone,
+{
+    fn without(self, i: usize) -> std::iter::Chain<std::iter::Take<Self>, std::iter::Skip<Self>> {
+        self.clone().take(i).chain(self.skip(i + 1))
+    }
+}
+
+impl<I> IteratorWithout for I where I: Iterator + Clone {}
+
 pub trait NewResult<T, E>
 where
     Self: Sized,

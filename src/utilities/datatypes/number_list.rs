@@ -48,6 +48,17 @@ where
         s.split_whitespace().parse().collect_result().map(Self::new)
     }
 }
+
+impl<T> FromIterator<T> for NumberList<T>
+where
+    T: num::ZeroablePrimitive,
+{
+    fn from_iter<T0: IntoIterator<Item = T>>(iter: T0) -> Self {
+        Self {
+            list: iter.into_iter().collect(),
+        }
+    }
+}
 #[test]
 fn test_number_list() {
     let test = NumberList::new(vec![1, 2, 3, 4]);
