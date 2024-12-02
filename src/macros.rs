@@ -39,6 +39,19 @@ macro_rules! build_run {
     };
 }
 #[macro_export]
+macro_rules! build_test {
+    ($($function:ident: $value: expr),+) => {
+        paste::paste! {
+        $(
+            #[test]
+            fn [< test _ $function:snake >]() {
+                assert_eq!($function(), $value);
+            }
+        )*
+        }
+    };
+}
+#[macro_export]
 macro_rules! build_mods {
     ($($day:tt),+) => {
         paste::paste! {

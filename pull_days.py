@@ -33,8 +33,7 @@ headers = [
     "user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
 ]
 
-# Download input for each day
-for day in range(1, 25):
+def download_day(day: int):
     url = base_url.format(day)
     output_file = f"src/day{day}/input.txt"
     header_str = " ".join([f"-H \"{header}\"" for header in headers])
@@ -43,3 +42,12 @@ for day in range(1, 25):
     # Execute the curl command
     subprocess.run(curl_command, shell=True)
     print(f"Downloaded input for day {day} to {output_file}")
+
+user_input = input("Enter day:")
+if user_input.isdigit():
+    download_day(int(user_input))
+    exit(0)
+
+# Download input for each day
+for day in range(1, 25):
+    download_day(day)

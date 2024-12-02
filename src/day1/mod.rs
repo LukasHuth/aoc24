@@ -1,4 +1,4 @@
-use crate::build_run;
+use crate::{build_run, build_test};
 fn part1() -> i64 {
     let [mut l1, mut l2] = get_list();
     l1.sort();
@@ -27,11 +27,4 @@ fn get_list() -> [Vec<i64>; 2] {
     [l1, l2]
 }
 build_run!(1, part1, part2);
-#[test]
-fn test_part1() {
-    assert_eq!(2264607, part1());
-}
-#[test]
-fn test_part2() {
-    assert_eq!(19457120, part2());
-}
+build_test!(part1: 2264607, part2: 19457120);
