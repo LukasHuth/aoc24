@@ -6,6 +6,7 @@ use crate::{
 };
 
 const SIZE: usize = 140;
+type Matrix = [[char; SIZE]; SIZE];
 const SEARCH_STR: [(char, usize); 4] = [('X', 0), ('S', 3), ('A', 2), ('M', 1)];
 const REVERSE_SEARCH_STR: [(char, usize); 4] = [('X', 3), ('S', 0), ('A', 1), ('M', 2)];
 
@@ -19,7 +20,7 @@ fn part2() -> usize {
     find_cross_mas(&data)
 }
 
-fn load_data() -> [[char; SIZE]; SIZE] {
+fn load_data() -> Matrix {
     let data = include_str!("input.txt");
     data.trimmed_lines()
         .map(|line| line.char_vec().try_into().unwrap())
@@ -27,7 +28,7 @@ fn load_data() -> [[char; SIZE]; SIZE] {
         .try_into()
         .unwrap()
 }
-fn find_vertical(data: &[[char; SIZE]; SIZE]) -> usize {
+fn find_vertical(data: &Matrix) -> usize {
     find_word(
         data,
         |data: &[[char; 140]; 140], arr_index: usize, offset: usize, i: usize, c: char| -> bool {
@@ -37,7 +38,7 @@ fn find_vertical(data: &[[char; SIZE]; SIZE]) -> usize {
         0..SIZE - 3,
     )
 }
-fn find_horizontal(data: &[[char; SIZE]; SIZE]) -> usize {
+fn find_horizontal(data: &Matrix) -> usize {
     find_word(
         data,
         |data: &[[char; 140]; 140], arr_index: usize, offset: usize, i: usize, c: char| -> bool {
@@ -47,10 +48,10 @@ fn find_horizontal(data: &[[char; SIZE]; SIZE]) -> usize {
         0..SIZE,
     )
 }
-fn find_diagonal(data: &[[char; SIZE]; SIZE]) -> usize {
+fn find_diagonal(data: &Matrix) -> usize {
     find_diagonal_right(data) + find_diagonal_left(data)
 }
-fn find_diagonal_right(data: &[[char; SIZE]; SIZE]) -> usize {
+fn find_diagonal_right(data: &Matrix) -> usize {
     find_word(
         data,
         |data: &[[char; 140]; 140], arr_index: usize, offset: usize, i: usize, c: char| -> bool {
@@ -60,7 +61,7 @@ fn find_diagonal_right(data: &[[char; SIZE]; SIZE]) -> usize {
         0..SIZE - 3,
     )
 }
-fn find_diagonal_left(data: &[[char; SIZE]; SIZE]) -> usize {
+fn find_diagonal_left(data: &Matrix) -> usize {
     find_word(
         data,
         |data: &[[char; 140]; 140], arr_index: usize, offset: usize, i: usize, c: char| -> bool {
@@ -70,10 +71,10 @@ fn find_diagonal_left(data: &[[char; SIZE]; SIZE]) -> usize {
         3..SIZE,
     )
 }
-type IdentificationFunction = fn(data: &[[char; SIZE]; SIZE], usize, usize, usize, char) -> bool;
+type IdentificationFunction = fn(data: &Matrix, usize, usize, usize, char) -> bool;
 #[inline(always)]
 fn find_word(
-    data: &[[char; SIZE]; SIZE],
+    data: &Matrix,
     identification: IdentificationFunction,
     range_1: Range<usize>,
     range_2: Range<usize>,
@@ -96,7 +97,7 @@ fn find_word(
     result
 }
 
-fn find_cross_mas(data: &[[char; SIZE]; SIZE]) -> usize {
+fn find_cross_mas(data: &Matrix) -> usize {
     (0..SIZE - 2)
         .flat_map(|i| (0..SIZE - 2).map(move |j| (i + 1, j + 1)))
         .filter(|&(x, y)| data[x][y] == 'A')
