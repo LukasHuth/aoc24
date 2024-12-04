@@ -84,6 +84,44 @@ where
     fn new_result(a: Result<T, E>) -> Result<Self, E>;
 }
 
+pub trait IteratorTrimmedLines {
+    fn trimmed_lines(&self) -> std::str::Lines;
+}
+impl IteratorTrimmedLines for &str {
+    fn trimmed_lines(&self) -> std::str::Lines {
+        self.trim().lines().into_iter()
+    }
+}
+impl IteratorTrimmedLines for String {
+    fn trimmed_lines(&self) -> std::str::Lines {
+        self.trim().lines().into_iter()
+    }
+}
+pub trait StringCharVec {
+    fn char_vec(&self) -> Vec<char>;
+}
+impl StringCharVec for &str {
+    fn char_vec(&self) -> Vec<char> {
+        self.chars().collect::<Vec<_>>()
+    }
+}
+impl StringCharVec for String {
+    fn char_vec(&self) -> Vec<char> {
+        self.chars().collect::<Vec<_>>()
+    }
+}
+pub trait IteratorToVec<T> {
+    fn to_vec(self) -> Vec<T>;
+}
+impl<T, I> IteratorToVec<T> for I
+where
+    I: Iterator<Item = T>,
+{
+    fn to_vec(self) -> Vec<T> {
+        self.collect()
+    }
+}
+
 #[test]
 fn test_collect_result() {
     let test_data = vec!["1", "2", "3"];
