@@ -122,6 +122,42 @@ where
     }
 }
 
+pub trait IteratorCount<T>
+where
+    Self: Iterator<Item = T>,
+{
+    fn count_element(self, value: T) -> usize;
+}
+
+impl<T, I> IteratorCount<T> for I
+where
+    I: Iterator<Item = T>,
+    T: PartialEq,
+{
+    #[inline]
+    fn count_element(self, value: T) -> usize {
+        Iterator::count(self.filter(|v| v == &value))
+    }
+}
+
+pub trait IteratorHasNElementsOf<T>
+where
+    Self: Iterator<Item = T> + IteratorCount<T>,
+{
+    fn has_n_elements_of(self, n: usize, element: T) -> bool;
+}
+
+impl<T, I> IteratorHasNElementsOf<T> for I
+where
+    I: Iterator<Item = T>,
+    T: PartialEq,
+{
+    #[inline]
+    fn has_n_elements_of(self, n: usize, element: T) -> bool {
+        self.count_element(element) == n
+    }
+}
+
 #[test]
 fn test_collect_result() {
     let test_data = vec!["1", "2", "3"];
