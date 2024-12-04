@@ -5,8 +5,9 @@ use crate::{
 
 // const SIZE: usize = 140;
 const SIZE: usize = 140;
-const SEARCH_STR: &str = "XMAS";
-const REVERSE_SEARCH_STR: &str = "SAMX";
+const SEARCH_STR: [(char, usize); 4] = [('X', 0), ('S', 3), ('A', 2), ('M', 1)];
+const REVERSE_SEARCH_STR: [(char, usize); 4] = [('X', 3), ('S', 0), ('A', 1), ('M', 2)];
+//const REVERSE_SEARCH_STR: &str = "SAMX";
 
 fn part1() -> usize {
     let data = load_data();
@@ -35,7 +36,7 @@ fn find_vertical(data: &[[char; SIZE]; SIZE]) -> usize {
     for arr_index in 0..SIZE {
         'offset_loop: for offset in 0..SIZE - (SEARCH_STR.len() - 1) {
             'str_loop: for str in strings {
-                for (i, c) in str.chars().enumerate() {
+                for (c, i) in str {
                     if data[arr_index][offset + i] != c {
                         continue 'str_loop;
                     };
@@ -53,7 +54,7 @@ fn find_horizontal(data: &[[char; SIZE]; SIZE]) -> usize {
     for arr_index in 0..SIZE - (SEARCH_STR.len() - 1) {
         'offset_loop: for offset in 0..SIZE {
             'str_loop: for str in strings {
-                for (i, c) in str.chars().enumerate() {
+                for (c, i) in str {
                     if data[arr_index + i][offset] != c {
                         continue 'str_loop;
                     };
@@ -71,7 +72,7 @@ fn find_diagonal_right(data: &[[char; SIZE]; SIZE]) -> usize {
     for arr_index in 0..SIZE - (SEARCH_STR.len() - 1) {
         'offset_loop: for offset in 0..SIZE - (SEARCH_STR.len() - 1) {
             'str_loop: for str in strings {
-                for (i, c) in str.chars().enumerate() {
+                for (c, i) in str {
                     if data[arr_index + i][offset + i] != c {
                         continue 'str_loop;
                     };
@@ -89,7 +90,7 @@ fn find_diagonal_left(data: &[[char; SIZE]; SIZE]) -> usize {
     for arr_index in 0..SIZE - (SEARCH_STR.len() - 1) {
         'offset_loop: for offset in SEARCH_STR.len() - 1..SIZE {
             'str_loop: for str in [SEARCH_STR, REVERSE_SEARCH_STR] {
-                for (i, c) in str.chars().enumerate() {
+                for (c, i) in str {
                     if data[arr_index + i][offset - i] != c {
                         continue 'str_loop;
                     };
