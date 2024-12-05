@@ -8,7 +8,7 @@ mod utilities;
 trait RunDay {
     fn run() -> Duration;
 }
-build_mods!(1, 2, 3, 4);
+build_mods!(1, 2, 3, 4, 5);
 fn main() {
     if std::env::args().count() <= 1 {
         return;
@@ -18,5 +18,5 @@ fn main() {
         .map(|str| str.parse::<u8>().ok())
         .flatten()
         .unwrap();
-    build_execute!(x, 1, 2, 3, 4);
+    build_execute!(x, 1, 2, 3, 4, 5);
 }

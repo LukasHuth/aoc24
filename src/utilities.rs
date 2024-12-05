@@ -66,24 +66,6 @@ where
 
 impl<I> IteratorWithout for I where I: Iterator + Clone {}
 
-pub trait NewResult<T, E>
-where
-    Self: Sized,
-{
-    /// Creates a new instance of the implementing type from a `Result`.
-    ///
-    /// If the input is `Ok(T)`, it returns `Ok(Self)` with a new instance of the type.
-    /// If the input is `Err(E)`, it returns the `Err` as-is.
-    ///
-    /// # Parameters
-    /// - `a`: A `Result<T, E>` value.
-    ///
-    /// # Returns
-    /// - `Ok(Self)`: If the input is `Ok(T)`, creates and returns a new instance of the type.
-    /// - `Err(E)`: If the input is `Err(E)`, returns the error.
-    fn new_result(a: Result<T, E>) -> Result<Self, E>;
-}
-
 pub trait IteratorTrimmedLines {
     fn trimmed_lines(&self) -> std::str::Lines;
 }

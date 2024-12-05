@@ -1,6 +1,6 @@
 use std::{cmp::Ordering, str::FromStr};
 
-use crate::utilities::{datatypes::NumberList, CollectIntoResult as _, MapParse as _, NewResult};
+use crate::utilities::{datatypes::NumberList, CollectIntoResult as _, MapParse as _};
 
 pub struct Report {
     numbers: NumberList<u32>,
@@ -47,19 +47,11 @@ impl Report {
         false
     }
 }
-impl<E> NewResult<Vec<u32>, E> for Report {
-    fn new_result(a: Result<Vec<u32>, E>) -> Result<Self, E> {
-        match a {
-            Ok(v) => Ok(Self::new(NumberList::new(v))),
-            Err(e) => Err(e),
-        }
-    }
-}
 impl FromStr for Report {
     type Err = <u32 as FromStr>::Err;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let numbers: NumberList<u32> = s.split_whitespace().parse().collect_result()?;
-        Ok(Self { numbers })
+        Ok(Self::new(numbers))
     }
 }
