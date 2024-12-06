@@ -1,12 +1,9 @@
 use std::{
-    collections::{HashMap, HashSet},
+    collections::HashSet,
     fmt::{Display, Write},
 };
 
-use crate::{
-    build_run, build_test,
-    utilities::{datatypes::num_wrapper::NumWrapper, IteratorToVec as _},
-};
+use crate::{build_run, build_test};
 
 fn part1() -> usize {
     let mut simulation = load_data();
@@ -14,24 +11,27 @@ fn part1() -> usize {
     simulation.visited_area.len()
 }
 
-fn part2() -> u64 {
+fn part2() -> usize {
     let simulation = load_data();
+    let start_guard = simulation.guard;
     let mut first_simulation = simulation.clone();
     first_simulation.run();
-    let visited_area = first_simulation.visited_area.into_iter().to_vec();
-    let mut loops = 0;
-    for visited_point in visited_area {
-        if visited_point == simulation.guard.pos {
-            continue;
-        }
-        let mut temp_simulation = simulation.into_lightweight();
-        temp_simulation.obstacles.insert(visited_point);
-        let is_loop = temp_simulation.run();
-        if is_loop {
-            loops += 1
-        }
-    }
-    loops
+    let mut simulation = simulation.into_lightweight();
+    first_simulation.visited_area
+        .into_iter()
+        .filter(|&point| point != start_guard.pos)
+        .filter_map(|point| {
+            simulation.reset(start_guard);
+            simulation.obstacles.insert(point);
+            let result = if simulation.run() {
+                Some(())
+            } else {
+                None
+            };
+            simulation.obstacles.remove(&point);
+            result
+        })
+        .count()
 }
 fn load_data() -> GuardSimulation {
     let str = include_str!("input.txt");
@@ -306,5 +306,11 @@ impl LightWeightGuardSimulation {
                 self.guard.pos = (next_obstacle.0 - 1, y);
             }
         }
+    }
+
+    fn reset(&mut self, start_guard: Guard) {
+        self.guard = start_guard;
+        self.in_loop = false;
+        self.out_of_area = false;
     }
 }
