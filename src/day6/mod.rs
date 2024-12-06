@@ -5,6 +5,8 @@ use std::{
 
 use crate::{build_run, build_test};
 
+const SIZE: usize = 130;
+
 fn part1() -> usize {
     let mut simulation = load_data();
     simulation.run();
@@ -17,17 +19,14 @@ fn part2() -> usize {
     let mut first_simulation = simulation.clone();
     first_simulation.run();
     let mut simulation = simulation.into_lightweight();
-    first_simulation.visited_area
+    first_simulation
+        .visited_area
         .into_iter()
         .filter(|&point| point != start_guard.pos)
         .filter_map(|point| {
             simulation.reset(start_guard);
             simulation.obstacles.insert(point);
-            let result = if simulation.run() {
-                Some(())
-            } else {
-                None
-            };
+            let result = if simulation.run() { Some(()) } else { None };
             simulation.obstacles.remove(&point);
             result
         })
@@ -129,7 +128,6 @@ impl Display for GuardSimulation {
         Ok(())
     }
 }
-const SIZE: usize = 130;
 #[inline]
 fn get_next_obstacle(guard: &Guard, obstacles: &HashSet<Position>) -> Option<Position> {
     match guard.direction {
