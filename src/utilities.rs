@@ -22,6 +22,7 @@ where
     I: Iterator<Item = Result<T, E>>,
     W: FromIterator<T>,
 {
+    #[inline]
     fn collect_result(self) -> Result<W, E> {
         self.collect::<Result<W, E>>()
     }
@@ -50,6 +51,7 @@ where
     T: FromStr,
     Self: Iterator<Item = &'a str> + Sized,
 {
+    #[inline]
     fn parse(self) -> MapParseIter<'a, T, Self> {
         self.map(str::parse::<T>)
     }
@@ -59,6 +61,7 @@ pub trait IteratorWithout: Iterator
 where
     Self: Sized + Clone,
 {
+    #[inline]
     fn without(self, i: usize) -> std::iter::Chain<std::iter::Take<Self>, std::iter::Skip<Self>> {
         self.clone().take(i).chain(self.skip(i + 1))
     }
@@ -75,6 +78,7 @@ impl IteratorTrimmedLines for &str {
     }
 }
 impl IteratorTrimmedLines for String {
+    #[inline]
     fn trimmed_lines(&self) -> std::str::Lines {
         self.trim().lines().into_iter()
     }
@@ -83,11 +87,13 @@ pub trait StringCharVec {
     fn char_vec(&self) -> Vec<char>;
 }
 impl StringCharVec for &str {
+    #[inline]
     fn char_vec(&self) -> Vec<char> {
         self.chars().collect::<Vec<_>>()
     }
 }
 impl StringCharVec for String {
+    #[inline]
     fn char_vec(&self) -> Vec<char> {
         self.chars().collect::<Vec<_>>()
     }
@@ -99,6 +105,7 @@ impl<T, I> IteratorToVec<T> for I
 where
     I: Iterator<Item = T>,
 {
+    #[inline]
     fn to_vec(self) -> Vec<T> {
         self.collect()
     }
@@ -137,6 +144,25 @@ where
     #[inline]
     fn has_n_elements_of(self, n: usize, element: T) -> bool {
         self.count_element(element) == n
+    }
+}
+
+pub trait ParseTrimmedLines<T>
+where
+    Self: IteratorTrimmedLines,
+    T: FromStr,
+{
+    fn parse_trimmed_lines(self) -> Result<Vec<T>, <T as FromStr>::Err>;
+}
+
+impl<T, T0> ParseTrimmedLines<T> for T0
+where
+    T0: IteratorTrimmedLines,
+    T: FromStr,
+{
+    #[inline]
+    fn parse_trimmed_lines(self) -> Result<Vec<T>, <T as FromStr>::Err> {
+        self.trimmed_lines().parse().collect_result()
     }
 }
 
