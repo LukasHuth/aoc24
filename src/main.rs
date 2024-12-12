@@ -1,6 +1,7 @@
 #![feature(iter_map_windows)]
 #![allow(internal_features)]
 #![feature(nonzero_internals)]
+#![feature(isqrt)]
 use std::time::Duration;
 
 mod macros;
@@ -8,7 +9,7 @@ mod utilities;
 trait RunDay {
     fn run() -> Duration;
 }
-build_mods!(1, 2, 3, 4, 5, 6, 7);
+build_mods!(1, 2, 3, 4, 5, 6, 7, 8);
 fn main() {
     if std::env::args().count() <= 1 {
         return;
@@ -18,5 +19,5 @@ fn main() {
         .map(|str| str.parse::<u8>().ok())
         .flatten()
         .unwrap();
-    build_execute!(x, 1, 2, 3, 4, 5, 6, 7);
+    build_execute!(x, 1, 2, 3, 4, 5, 6, 7, 8);
 }
