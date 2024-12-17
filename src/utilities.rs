@@ -1,5 +1,6 @@
 use std::{
-    ops::{Add, AddAssign, BitAnd, Deref, Index},
+    num::ZeroablePrimitive,
+    ops::{Add, AddAssign, BitAnd, Deref, DivAssign, Index},
     str::FromStr,
 };
 
@@ -218,6 +219,25 @@ where
         let temp = *self;
         *self = *self + 1u8.into();
         temp
+    }
+}
+
+pub trait DigitCount {
+    fn digit_count(&self) -> usize;
+}
+
+impl<T> DigitCount for T
+where
+    T: ZeroablePrimitive + Copy + From<u8> + PartialEq + DivAssign,
+{
+    fn digit_count(&self) -> usize {
+        let mut count = 0;
+        let mut data = *self;
+        while data != 0u8.into() {
+            count += 1;
+            data /= 10u8.into();
+        }
+        count
     }
 }
 
