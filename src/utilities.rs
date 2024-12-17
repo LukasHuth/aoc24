@@ -1,4 +1,7 @@
-use std::str::FromStr;
+use std::{
+    ops::{Add, AddAssign, BitAnd, Deref, Index},
+    str::FromStr,
+};
 
 pub mod datatypes;
 
@@ -163,6 +166,58 @@ where
     #[inline]
     fn parse_trimmed_lines(self) -> Result<Vec<T>, <T as FromStr>::Err> {
         self.trimmed_lines().parse().collect_result()
+    }
+}
+
+pub trait MoveElement {
+    fn move_element(&mut self, from: usize, to: usize);
+}
+
+impl<T> MoveElement for Vec<T> {
+    fn move_element(&mut self, from: usize, to: usize) {
+        if from < self.len() && to < self.len() && from != to {
+            if from < to {
+                for i in from..to {
+                    self.swap(i, i + 1);
+                }
+            } else {
+                for i in (to + 1..from + 1).rev() {
+                    self.swap(i, i - 1);
+                }
+            }
+        }
+    }
+}
+
+pub trait IsEven {
+    fn is_even(&self) -> bool;
+}
+
+impl<T> IsEven for T
+where
+    T: std::num::ZeroablePrimitive + BitAnd<Output = T> + From<u8> + Copy + PartialEq,
+{
+    #[inline]
+    fn is_even(&self) -> bool {
+        *self & 1u8.into() == 0u8.into()
+    }
+}
+
+pub trait IncrementAfter
+where
+    Self: Add + Sized,
+{
+    fn increment_after(&mut self) -> Self;
+}
+
+impl<T> IncrementAfter for T
+where
+    T: Sized + Add<Output = T> + From<u8> + Copy,
+{
+    fn increment_after(&mut self) -> Self {
+        let temp = *self;
+        *self = *self + 1u8.into();
+        temp
     }
 }
 
