@@ -1,6 +1,8 @@
 use std::{
-    collections::HashSet,
     fmt::{Display, Write},
+    marker::PhantomData,
+    ops::Range,
+    vec::IntoIter,
 };
 
 use crate::{build_run, build_test};
@@ -25,9 +27,9 @@ fn part2() -> usize {
         .filter(|&point| point != start_guard.pos)
         .filter_map(|point| {
             simulation.reset(start_guard);
-            simulation.obstacles.insert(point);
+            simulation.obstacles.push(point);
             let result = if simulation.run() { Some(()) } else { None };
-            simulation.obstacles.remove(&point);
+            simulation.obstacles.pop();
             result
         })
         .count()
@@ -59,7 +61,7 @@ fn load_data() -> GuardSimulation {
         },
         obstacles,
         out_of_area: false,
-        visited_area: HashSet::new(),
+        visited_area: BitSet::<130, Position>::new(),
         in_loop: false,
     }
 }
@@ -83,6 +85,14 @@ impl Direction {
             Direction::Left => Direction::Up,
         }
     }
+    fn to_int(&self) -> usize {
+        match self {
+            Self::Up => 0,
+            Self::Down => 1,
+            Self::Left => 2,
+            Self::Right => 3,
+        }
+    }
 }
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 struct Guard {
@@ -92,14 +102,14 @@ struct Guard {
 #[derive(Debug, Clone)]
 struct GuardSimulation {
     guard: Guard,
-    obstacles: HashSet<Position>,
+    obstacles: Vec<Position>,
     out_of_area: bool,
-    visited_area: HashSet<Position>,
+    visited_area: BitSet<130, Position>,
     in_loop: bool,
 }
 struct LightWeightGuardSimulation {
     guard: Guard,
-    obstacles: HashSet<Position>,
+    obstacles: Vec<Position>,
     out_of_area: bool,
     in_loop: bool,
 }
@@ -129,7 +139,7 @@ impl Display for GuardSimulation {
     }
 }
 #[inline]
-fn get_next_obstacle(guard: &Guard, obstacles: &HashSet<Position>) -> Option<Position> {
+fn get_next_obstacle(guard: &Guard, obstacles: &Vec<Position>) -> Option<Position> {
     match guard.direction {
         Direction::Left => obstacles
             .iter()
@@ -160,7 +170,7 @@ fn get_next_obstacle(guard: &Guard, obstacles: &HashSet<Position>) -> Option<Pos
 impl GuardSimulation {
     #[inline]
     fn run(&mut self) -> bool {
-        let mut moves = HashSet::new();
+        let mut moves = BitSet::<130, Guard>::new();
         while !(self.out_of_area || self.in_loop) {
             self.step(&mut moves);
         }
@@ -180,12 +190,12 @@ impl GuardSimulation {
         get_next_obstacle(&self.guard, &self.obstacles)
     }
     #[inline]
-    fn step(&mut self, moves: &mut HashSet<Guard>) {
+    fn step(&mut self, moves: &mut BitSet<130, Guard>) {
         if moves.contains(&self.guard) {
             self.in_loop = true;
             return;
         }
-        moves.insert(self.guard);
+        moves.insert(&self.guard);
         if let Some(next_obstacle) = self.get_next_obstacle() {
             self.do_move(next_obstacle);
             self.guard.direction.rotate90();
@@ -257,10 +267,122 @@ impl GuardSimulation {
         }
     }
 }
+#[derive(Clone, Debug)]
+struct BitSet<const SIZE: usize, T> {
+    section_count: [u16; SIZE],
+    data: [[[bool; 4]; SIZE]; SIZE],
+    phantom: PhantomData<T>,
+}
+struct BitSetIntoIterator<const SIZE: usize, T> {
+    bitset: BitSet<SIZE, T>,
+    outer: usize,
+    inner: usize,
+    this_line: u16,
+}
+impl<const SIZE: usize> Iterator for BitSetIntoIterator<SIZE, Position> {
+    type Item = Position;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while self.outer < SIZE {
+            if self.bitset.section_count[self.outer] < self.this_line {
+                self.outer += 1;
+                self.this_line = 0;
+                continue;
+            }
+            let x = self.outer;
+            while self.inner < SIZE {
+                let pos = (x, self.inner);
+                self.inner += 1;
+                if self.bitset.contains(&pos) {
+                    self.this_line += 1;
+                    return Some(pos);
+                }
+            }
+            self.inner = 0;
+            self.outer += 1;
+            self.this_line = 0;
+        }
+        None
+    }
+}
+impl<const SIZE: usize> IntoIterator for BitSet<SIZE, Position> {
+    type Item = Position;
+    type IntoIter = BitSetIntoIterator<SIZE, Position>;
+    fn into_iter(self) -> Self::IntoIter {
+        BitSetIntoIterator {
+            bitset: self,
+            outer: 0,
+            inner: 0,
+            this_line: 0,
+        }
+    }
+}
+impl<const SIZE: usize, T> BitSet<SIZE, T> {
+    fn len(&self) -> usize {
+        self.data
+            .map(|v| {
+                v.map(|v| v.into_iter().filter(|v| *v).count())
+                    .into_iter()
+                    .sum::<usize>()
+            })
+            .into_iter()
+            .sum()
+    }
+}
+impl<const SIZE: usize> BitSet<SIZE, Guard> {
+    fn new() -> Self {
+        Self {
+            data: [[[false; 4]; SIZE]; SIZE],
+            section_count: [0; SIZE],
+            phantom: PhantomData::default(),
+        }
+    }
+    fn insert(&mut self, guard: &Guard) {
+        if !self.contains(guard) {
+            self.data[guard.pos.0][guard.pos.1][guard.direction.to_int()] = true;
+            self.section_count[guard.pos.0] += 1;
+        }
+    }
+    fn contains(&self, guard: &Guard) -> bool {
+        unsafe {
+            *self
+                .data
+                .get_unchecked(guard.pos.0)
+                .get_unchecked(guard.pos.1)
+                .get_unchecked(guard.direction.to_int())
+        }
+        // self.data[guard.pos.0][guard.pos.1][guard.direction.to_int()]
+    }
+}
+impl<const SIZE: usize> BitSet<SIZE, Position> {
+    fn new() -> Self {
+        Self {
+            data: [[[false; 4]; SIZE]; SIZE],
+            section_count: [0; SIZE],
+            phantom: PhantomData::default(),
+        }
+    }
+    fn insert(&mut self, pos: Position) {
+        if !self.contains(&pos) {
+            self.data[pos.0][pos.1][0] = true;
+            self.section_count[pos.0] += 1;
+        }
+    }
+    fn contains(&self, pos: &Position) -> bool {
+        unsafe {
+            *self
+                .data
+                .get_unchecked(pos.0)
+                .get_unchecked(pos.1)
+                .get_unchecked(0)
+        }
+        // self.data[guard.pos.0][guard.pos.1][guard.direction.to_int()]
+    }
+}
 impl LightWeightGuardSimulation {
     #[inline]
     fn run(&mut self) -> bool {
-        let mut moves = HashSet::new();
+        let mut moves = BitSet::<130, Guard>::new();
         while !(self.out_of_area || self.in_loop) {
             self.step(&mut moves);
         }
@@ -271,12 +393,12 @@ impl LightWeightGuardSimulation {
         get_next_obstacle(&self.guard, &self.obstacles)
     }
     #[inline]
-    fn step(&mut self, moves: &mut HashSet<Guard>) {
+    fn step(&mut self, moves: &mut BitSet<130, Guard>) {
         if moves.contains(&self.guard) {
             self.in_loop = true;
             return;
         }
-        moves.insert(self.guard);
+        moves.insert(&self.guard);
         if let Some(next_obstacle) = self.get_next_obstacle() {
             self.do_move(next_obstacle);
             self.guard.direction.rotate90();
