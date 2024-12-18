@@ -155,13 +155,6 @@ impl DiskSpace {
             _ => false,
         }
     }
-    fn id(&self) -> usize {
-        match self {
-            Self::File { id, .. } => *id,
-            _ => 0,
-        }
-    }
-
     fn increment_length(&mut self, arg: u32) {
         match self {
             Self::File { length, .. } | Self::Free { length } => *length += arg,

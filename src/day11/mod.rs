@@ -1,7 +1,8 @@
 use std::{collections::HashMap, hash::Hash, str::FromStr};
 
 use crate::{
-    build_run, build_test, utilities::{CollectIntoResult, DigitCount, IsEven, IteratorToVec, MapParse}
+    build_run, build_test,
+    utilities::{CollectIntoResult, DigitCount, IsEven, MapParse},
 };
 
 fn part1() -> u128 {

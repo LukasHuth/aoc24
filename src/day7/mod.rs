@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use crate::{
     build_run, build_test,
-    utilities::{CollectIntoResult, IteratorTrimmedLines, MapParse as _, ParseTrimmedLines as _},
+    utilities::{CollectIntoResult, MapParse as _, ParseTrimmedLines as _},
 };
 
 fn part1() -> u128 {
